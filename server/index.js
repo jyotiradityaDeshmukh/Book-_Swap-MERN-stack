@@ -6,6 +6,7 @@ const Cart = require("./model/cart");
 const cors = require("cors");
 const Swap = require("./model/swaprequest");
 const Checkout = require("./model/buyed");
+const Razorpay = require("razorpay");
 
 mongo
   .connect(
@@ -93,6 +94,7 @@ app.post("/checkout", async (req, res) => {
   }).then(() => {
     console.log(user, name);
   });
+  // await gatwway(res, price);
   await Checkout.create({
     email: user,
     name: name,
@@ -172,5 +174,31 @@ app.post("/acceptswapfuc", async (req, res) => {
 
 //delete user,swapbook2
 //delete email2,swap_book
+
+const razorpay = new Razorpay({
+  key_id: "rzp_test_1234567890ABC",
+  key_secret: "1234567890abcdef1234567890abcdef",
+});
+
+async function gatwway(res, amount) {
+  try {
+    const options = {
+      amount: amount,
+      currency: "USD",
+    };
+
+    const order = await razorpay.orders.create(options);
+    res.json({
+      status: "success",
+      order,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: "error",
+      message: "Something went wrong while creating the order",
+    });
+  }
+}
 
 app.listen(8000, () => console.log("hello"));
